@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { Post } from '../post.model';
 import { PostsService } from '../posts.service';
+import { PageEvent } from '@angular/material';
 
 @Component({
   selector: 'app-post-list',
@@ -13,6 +14,10 @@ import { PostsService } from '../posts.service';
 export class PostListComponent implements OnInit, OnDestroy {
   posts: Post [] = [];
   isLoading = false;
+  totalPosts = 0;
+  postsPerpage = 2;
+  currentPage = 1;
+  pageSizeOption = [1, 2, 5, 10];
   private postsSub: Subscription;
 
   constructor(public postsService: PostsService) {
@@ -20,16 +25,26 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isLoading = true;
-    this.postsService.getPosts();
+    this.postsService.getPosts(this.postsPerpage, this.currentPage);
     this.postsSub = this.postsService.getPostUpdateListener()
-                      .subscribe((posts: Post[]) => {
+                      .subscribe((postData: { posts: Post[], postCount: number}) => {
                           this.isLoading = false;
-                          this.posts = posts;
+                          this.totalPosts = postData.postCount;
+                          this.posts = postData.posts;
                       });
   }
 
   onDelete(postId: string) {
-    this.postsService.deletePost(postId);
+    this.postsService.deletePost(postId).subscribe(() => {
+      this.postsService.getPosts(this.postsPerpage, this.currentPage);
+    });
+  }
+
+  onChangedPage(pageData: PageEvent) {
+    this.isLoading = true;
+    this.currentPage = pageData.pageIndex + 1;
+    this.postsPerpage = pageData.pageSize;
+    this.postsService.getPosts(this.postsPerpage, this.currentPage);
   }
 
   // We need to Destroy the subscription fron `ngOnInit` to avoid memory leaks
