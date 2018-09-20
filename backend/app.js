@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -6,6 +7,8 @@ const app = express();
 const postsRoutes = require('./routes/posts');
 
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use('/images', express.static(path.join('backend/images')));
 
 mongoose.connect('mongodb+srv://paul:YU8vMTDf0EfIAgcw@cluster0-xbk8i.mongodb.net/test?retryWrites=true')
         .then(() => {
