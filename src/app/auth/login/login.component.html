@@ -27,7 +27,9 @@
         <button
               mat-raised-button
               color="accent"
-              type="submit">Login
+              type="submit"
+              *ngIf="!isLoading">Login
         </button>
+        <mat-spinner *ngIf="isLoading"></mat-spinner>
   </form>
 </mat-card>
